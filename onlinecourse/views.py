@@ -144,14 +144,15 @@ def submit(request, course_id):
         # For each selected choice, check if it is a correct answer or not
         # Calculate the total score
 def show_exam_result(request, course_id, submission_id):
-    course = Course.objects.filter(id=course_id)
-    submission = Submission.objects.filter(id=submission_id)
-    selected_ids = submission.choices
-    print(selected_ids)
-    total_score = sum([
-        question.grade for question in course.question_set.all if question.get_score(selected_ids)
-    ])
+    course = Course.objects.get(id=course_id)
+    submission = Submission.objects.get(id=submission_id)
+    questions = Question.objects.filter(lesson=course).all()
+    selected_ids = [choice.id for choice in submission.choices.all()]
+    total_score = round(sum([
+        question.grade for question in questions if question.get_score(submission.choices.all())
+    ]))
     context = {
+        'course': course,
         'selected_ids': selected_ids,
         'grade': total_score,
     }
